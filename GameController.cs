@@ -152,9 +152,9 @@ public class GameController : MonoBehaviour
             {
                 Debug.Log("File path doesn't exist. Try saving the game first");
                 yield break;
-            }
+            }	
 
-            string line = "";
+	    string line = "";
 
             using (StreamReader sr = new StreamReader(inventoryFilePath))
             {

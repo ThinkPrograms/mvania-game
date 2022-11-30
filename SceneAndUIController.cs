@@ -38,23 +38,11 @@ public class SceneAndUIController : MonoBehaviour
         }
 
         Canvas = GameObject.FindWithTag("MainCanvas");
-        MainmenuUI.gameObject.SetActive(false);
-        GameFileUI.gameObject.SetActive(false);
-        SettingsUI.gameObject.SetActive(false);
-        ConfirmationUI.gameObject.SetActive(false);
-        GameUI.gameObject.SetActive(false);
-        PauseUI.gameObject.SetActive(false);
-        SettingsVideoUI.gameObject.SetActive(false);
-
+        
+        DisableAllUI();
         Paused = false;
-        MainmenuUI.alpha = 0;
-        GameFileUI.alpha = 0;
-        SettingsUI.alpha = 0;
-        ConfirmationUI.alpha = 0;
-        GameUI.alpha = 0;
-        PauseUI.alpha = 0;
-        SettingsVideoUI.alpha = 0;
         Time.timeScale = 1;
+        //
         curUI = "mainmenu";
         currentUI = MainmenuUI;
         SetUI("mainmenu");
@@ -68,19 +56,11 @@ public class SceneAndUIController : MonoBehaviour
         }
 
         CurrentScene = SceneManager.GetActiveScene().buildIndex;
-        // (If scene isnt main menu)
-        if (CurrentScene != MainMenuScene)
-        {
-            // Pause game from ESC-key
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                Pause();
-            }
-        }
     }
 
     public void SetUI(string UI)
     {
+
         DisableButtons();
         Invoke("EnableButtons", 2f);
         switch (UI)
@@ -153,6 +133,11 @@ public class SceneAndUIController : MonoBehaviour
                 {
                     NewUI.alpha = 1;
                 }
+                else if (NewUI == SettingsUI)
+                {
+                    SettingsVideoUI.gameObject.SetActive(true);
+                    SettingsVideoUI.alpha += Time.deltaTime;
+                }
                 NewUI.alpha += Time.deltaTime;
                 yield return null;
             }
@@ -176,6 +161,8 @@ public class SceneAndUIController : MonoBehaviour
 
     public void Pause()
     {
+         //When pausing the game, divide the music volume by 2 or atleast lower it a bit
+         // If game is paused an when saving settings: volume /= (float) adjustVol. Do the same when you go into Paused state
         if (Paused)
         {
             Paused = false;
@@ -195,7 +182,6 @@ public class SceneAndUIController : MonoBehaviour
     {
         if (ui == SettingsUI)
         {
-            SettingsVideoUI.gameObject.SetActive(true);
             SettingsVideoUI.alpha = 1;
         }
 
@@ -268,8 +254,12 @@ public class SceneAndUIController : MonoBehaviour
     IEnumerator LoadsceneAsync(int sceneId, float animDuration)
     {
         yield return new WaitForSeconds(animDuration);
+
         SetUI("loadingScreen");
-        yield return new WaitForSeconds(1);
+        AudioController.Instance.fadeMusicOut();
+
+        yield return new WaitForSeconds(3f);
+
         // Load the scene and use "operation" to check when the scene finishes loading
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneId);
 
@@ -297,12 +287,16 @@ public class SceneAndUIController : MonoBehaviour
 
                 Debug.Log("Scene finished loading: Switching to Main menu ui");
                 SetUI("mainmenu");
-                // Deletes health gameobjects
+
+                // Delete health gameobjects
                 GameController.Instance.Player.PH.SetHP(0);
 
                 yield return new WaitForSeconds(1f);
                 FadeOut.SetActive(false);
             }
+            
+            yield return new WaitForSeconds(0.5f);
+            AudioController.Instance.findMusic(CurrentScene, 0f);
         }
     }
 }

@@ -48,7 +48,8 @@ public class Inventory
                     item.amount++;
                     Debug.Log("Increased an existing items amount");
                     break;
-                } else if (i >= itemList.Count)
+                }
+                else if (i >= itemList.Count)
                 {
                     itemList.Add(itemToAdd);
                     Debug.Log("Item not found. New item added to the inventory");
